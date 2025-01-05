@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import math
 import warnings
 
 
@@ -23,8 +24,8 @@ class SpecAug(nn.Module):
 
 def apply_masking(x, num_masks, mask_range, mask_ratio_range, axis):
     if mask_range is None:
-        min_mask_range = max(0, mask_ratio_range[0] * x.size(axis))
-        max_mask_range = min(x.size(axis), mask_ratio_range[1] * x.size(axis))
+        min_mask_range = max(0, math.floor(mask_ratio_range[0] * x.size(axis)))
+        max_mask_range = min(x.size(axis), math.floor(mask_ratio_range[1] * x.size(axis)))
         mask_range = (min_mask_range, max_mask_range)
     
     if mask_range[0] > mask_range[1]:
@@ -36,7 +37,7 @@ def apply_masking(x, num_masks, mask_range, mask_ratio_range, axis):
 
 
 def mask_along_axis(x, num_masks, mask_range, axis):
-    batch = x.size(axis)
+    batch = x.size(0)
     D = x.size(axis)
 
     mask_len = torch.randint(mask_range[0], mask_range[1], (batch, num_masks), device=x.device).unsqueeze(2)
